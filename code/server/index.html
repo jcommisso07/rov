@@ -1,0 +1,182 @@
+<html>
+<head>
+<title>Pi ROV Web</title>
+<html>
+<head>
+<title>Pi ROV Web</title>
+<style>
+/* fonts, colors, padding and stuff */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
+
+/* title style */
+h1 {
+    color: #333;
+}
+
+/* button style */
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out;
+    border-radius: 30px;
+}
+
+/* animate buttons on tap */
+button:active {
+    transform: scale(0.9);
+}
+
+/* image style */
+img {
+    display: block;
+    margin: auto;
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+}
+
+/* button layout */
+#control-buttons {
+    display: flex;
+    flex-direction: row;  
+    align-items: center;  
+    justify-content: center;  
+    gap: 20px;  
+}
+
+/* position the up and down controls stacked */
+#vertical-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* position directional controls stacked */
+#direction-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;  
+    gap: 10px;
+}
+
+/* position the left and right buttons next to each other */
+#horizontal-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+/* color the vertical buttons red */
+.vertical-button {
+    background-color: #438ac8;
+}
+
+/* color the stop button red */
+.stop-button {
+    background-color: #c84343;
+}
+</style>
+
+
+<script>
+    // fetch sensor data 
+function updateData() {
+    fetch('/data.json')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('accel_x').textContent = data.accel_x;
+            document.getElementById('accel_y').textContent = data.accel_y;
+            document.getElementById('accel_z').textContent = data.accel_z;
+            document.getElementById('gyro_x').textContent = data.gyro_x;
+            document.getElementById('gyro_y').textContent = data.gyro_y;
+            document.getElementById('gyro_z').textContent = data.gyro_z;
+            document.getElementById('lidar_distance').textContent = data.lidar_distance;
+            document.getElementById('internal_temp').textContent = data.internal_temp;
+            document.getElementById('external_temp').textContent = data.external_temp;
+        });
+}
+
+setInterval(updateData, 1000);  // update every second
+
+// post to pass control buttons to server
+function move(direction) {
+    fetch('/move/' + direction, { method: 'POST' });
+}
+// add keybinds to allow keyboard control
+window.addEventListener('keydown', function(event) {
+    switch (event.key) {
+        case '/':
+            move('up');
+            break;
+        case '.':
+            move('down');
+            break;
+        case 'ArrowUp':
+            move('forward');
+            break;
+        case 'ArrowDown':
+            move('backward');
+            break;
+        case 'ArrowLeft':
+            move('left');
+            break;
+        case 'ArrowRight':
+            move('right');
+            break;
+        case 's':
+            move('stop');
+            break;
+    }
+});
+</script>
+</head>
+<body>
+<div class="container">
+    <h1>Pi ROV Web</h1>
+    <!-- camera stream-->
+    <img src="stream.mjpg" />
+    <!-- sensor data stream-->
+    <p>ACCEL_X: <span id="accel_x"></span>, ACCEL_Y: <span id="accel_y"></span>, ACCEL_Z: <span id="accel_z"></span></p>
+    <p>GYRO_X: <span id="gyro_x"></span>, GYRO_Y: <span id="gyro_y"></span>, GYRO_Z: <span id="gyro_z"></span></p>
+    <p>LIDAR Distance (cm): <span id="lidar_distance"></span></p>
+    <p>Internal Temperature (&deg;F): <span id="internal_temp"></span></p>
+    <p>External Temperature (&deg;F): <span id="external_temp"></span></p>
+    <!-- controls-->
+    <div id="control-buttons">
+        <div id="vertical-controls">
+            <button class="vertical-button" onclick="move('up')">Up (/)</button>
+            <button class="vertical-button" onclick="move('down')">Down (.)</button>
+        </div>
+        <div id="direction-controls">
+            <button onclick="move('forward')">Forward (&uarr;)</button>
+            <div id="horizontal-controls">
+                <button onclick="move('left')">Left (&larr;)</button>
+                <button onclick="move('right')">Right (&rarr;)</button>
+            </div>
+            <button onclick="move('backward')">Backward (&darr;)</button>
+        </div>
+        <button class="stop-button" onclick="move('stop')">Stop (s)</button>
+    </div>
+</div>
+</body>
+</html>

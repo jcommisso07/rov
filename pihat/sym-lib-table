@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "ROV_PCB")(type "KiCad")(uri "${KIPRJMOD}/ROV_PCB.kicad_sym")(options "")(descr ""))
+)
